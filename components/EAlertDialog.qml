@@ -16,6 +16,10 @@ Item {
     property string cancelText: "Cancel"
     property string confirmText: "Continue"
     property bool dismissOnOverlay: true
+    property real dialogMinWidth: 280
+    property real dialogMaxWidth: 560
+    property real dialogPreferredWidth: 420
+    property real dialogHorizontalMargin: 48
     signal confirm()
     signal cancel()
 
@@ -46,7 +50,18 @@ Item {
     // 毛玻璃对话框主体
     Components.EBlurCard {
         id: card
-        width: 420
+        width: {
+            var minWidth = Math.max(0, Number(dialogRoot.dialogMinWidth || 280))
+            var maxWidth = Math.max(minWidth, Number(dialogRoot.dialogMaxWidth || 560))
+            var margin = Math.max(0, Number(dialogRoot.dialogHorizontalMargin || 48))
+            var parentWidth = parent ? parent.width : dialogRoot.width
+            var availableWidth = Math.max(minWidth, parentWidth - margin)
+            var preferredWidth = Number(dialogRoot.dialogPreferredWidth || 0)
+            if (preferredWidth > 0) {
+                return Math.min(maxWidth, Math.max(minWidth, Math.min(preferredWidth, availableWidth)))
+            }
+            return Math.min(maxWidth, availableWidth)
+        }
         height: contentCol.implicitHeight + 28
         anchors.centerIn: parent
         blurSource: dialogRoot.parent // 使用父内容作为模糊源
